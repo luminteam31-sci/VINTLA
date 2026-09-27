@@ -1,14 +1,14 @@
 // src/services/footballApi.js
-// Thin wrapper around API-FOOTBALL (RapidAPI free tier).
+// Thin wrapper around API-FOOTBALL, called directly through API-Sports'
+// own dashboard (dashboard.api-football.com) rather than via RapidAPI.
 // Docs: https://www.api-football.com/documentation-v3
 
 const axios = require('axios');
 
 const client = axios.create({
-  baseURL: `https://${process.env.RAPIDAPI_HOST}/v3`,
+  baseURL: 'https://v3.football.api-sports.io',
   headers: {
-    'x-rapidapi-key': process.env.RAPIDAPI_KEY,
-    'x-rapidapi-host': process.env.RAPIDAPI_HOST
+    'x-apisports-key': process.env.APISPORTS_KEY
   }
 });
 
