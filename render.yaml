@@ -6,10 +6,8 @@ services:
     buildCommand: npm install
     startCommand: npm start
     envVars:
-      - key: RAPIDAPI_KEY
+      - key: APISPORTS_KEY
         sync: false
-      - key: RAPIDAPI_HOST
-        value: api-football-v1.p.rapidapi.com
       - key: TWILIO_ACCOUNT_SID
         sync: false
       - key: TWILIO_AUTH_TOKEN
