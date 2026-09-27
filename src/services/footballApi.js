@@ -45,7 +45,7 @@ async function getFixtureById(fixtureId) {
 function normalizeFixture(raw) {
   return {
     id: raw.fixture.id,
-    status: raw.fixture.status.short, // e.g. "1H", "HT", "2H", "FT", "NS"
+    status: raw.fixture.status.short,
     minute: raw.fixture.status.elapsed,
     league: raw.league.name,
     country: raw.league.country,
@@ -65,8 +65,8 @@ function normalizeFixture(raw) {
     },
     events: (raw.events || []).map(e => ({
       minute: e.time.elapsed,
-      type: e.type,       // Goal, Card, subst, Var
-      detail: e.detail,   // Normal Goal, Yellow Card, etc.
+      type: e.type,
+      detail: e.detail,
       team: e.team.name,
       player: e.player?.name
     })),
