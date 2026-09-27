@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>VINTLA — Live Football Scores</title>
+
+<style>
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --bg: #070b12;
+    --panel: #0d131d;
+    --panel2: #111925;
+    --border: rgba(255,255,255,0.07);
+    --text: #f5f7fa;
+    --muted: #8993a3;
+    --green: #19e68c;
+    --green-dark: #0ca965;
+    --red: #ff4d5e;
+    --yellow: #ffc857;
+    --blue: #4d8dff;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background:
+        radial-gradient(circle at 80% 0%, rgba(25,230,140,.08), transparent 25%),
+        var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+}
+
+header {
+    height: 72px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 5%;
+    border-bottom: 1px solid var(--border);
+    background: rgba(7,11,18,.85);
+    backdrop-filter: blur(20px);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 25px;
+    font-weight: 900;
+    letter-spacing: -1px;
+}
+
+.logo-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 11px;
+    display: grid;
+    place-items: center;
+    background: var(--green);
+    color: #04130d;
+    font-weight: 1000;
+    box-shadow: 0 0 25px rgba(25,230,140,.25);
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.google-btn {
+    border: 1px solid var(--border);
+    background: var(--panel);
+    color: var(--text);
+    padding: 11px 17px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 700;
+    transition: .2s;
+}
+
+.google-btn:hover {
+    border-color: rgba(25,230,140,.4);
+    transform: translateY(-1px);
+}
+
+.profile {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #19e68c, #1464ff);
+    display: grid;
+    place-items: center;
+    font-weight: 900;
+}
+
+.layout {
+    display: grid;
+    grid-template-columns: 235px 1fr;
+    min-height: calc(100vh - 72px);
+}
+
+.sidebar {
+    border-right: 1px solid var(--border);
+    padding: 28px 16px;
+    background: rgba(9,14,22,.7);
+}
+
+.sidebar-title {
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 0 12px;
+    margin-bottom: 12px;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    padding: 13px 14px;
+    margin-bottom: 4px;
+    border-radius: 10px;
+    color: var(--muted);
+    cursor: pointer;
+    transition: .2s;
+}
+
+.nav-item:hover { background: var(--panel2); color: var(--text); }
+.nav-item.active { background: rgba(25,230,140,.09); color: var(--green); }
+.nav-icon { width: 22px; text-align: center; }
+.sidebar-divider { height: 1px; background: var(--border); margin: 22px 10px; }
+
+main {
+    width: 100%;
+    max-width: 1250px;
+    margin: auto;
+    padding: 34px 5% 100px;
+}
+
+.hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 30px;
+    margin-bottom: 30px;
+}
+
+.hero h1 { font-size: clamp(30px, 4vw, 48px); line-height: 1.05; letter-spacing: -2px; }
+.hero h1 span { color: var(--green); }
+.hero p { color: var(--muted); margin-top: 9px; font-size: 15px; }
+
+.live-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(25,230,140,.07);
+    color: var(--green);
+    border: 1px solid rgba(25,230,140,.15);
+    padding: 10px 14px;
+    border-radius: 30px;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.live-dot { width: 7px; height: 7px; background: var(--green); border-radius: 50%; animation: pulse 1.4s infinite; }
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(25,230,140,.6); }
+    70% { box-shadow: 0 0 0 8px rgba(25,230,140,0); }
+    100% { box-shadow: 0 0 0 0 rgba(25,230,140,0); }
+}
+
+.search-box {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 13px;
+    padding: 0 16px;
+    height: 50px;
+    margin-bottom: 22px;
+}
+
+.search-box span { color: var(--muted); }
+.search-box input { flex: 1; border: 0; outline: 0; background: transparent; color: white; font-size: 14px; }
+
+.filters { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 27px; }
+.filters::-webkit-scrollbar { height: 0; }
+
+.filter {
+    white-space: nowrap;
+    padding: 9px 15px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.filter.active { background: var(--green); color: #04130d; border-color: var(--green); }
+
+.section-header { display: flex; justify-content: space-between; align-items: center; margin: 28px 0 13px; }
+.section-header h2 { font-size: 18px; }
+.section-header span { color: var(--muted); font-size: 12px; }
+
+.match-card {
+    background: linear-gradient(145deg, rgba(255,255,255,.025), rgba(255,255,255,.008)), var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    margin-bottom: 12px;
+    overflow: hidden;
+    transition: .25s;
+}
+
+.match-card:hover { border-color: rgba(25,230,140,.25); transform: translateY(-2px); }
+
+.match-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 13px 17px;
+    border-bottom: 1px solid var(--border);
+}
+
+.competition { color: var(--muted); font-size: 11px; font-weight: 700; }
+.live-label { color: var(--green); font-size: 10px; font-weight: 900; }
+
+.match-body { display: grid; grid-template-columns: 1fr 110px 1fr; align-items: center; padding: 20px; }
+.team { display: flex; align-items: center; gap: 12px; }
+.team.away { justify-content: flex-end; text-align: right; }
+
+.team-logo {
+    width: 43px;
+    height: 43px;
+    border-radius: 50%;
+    background: #182231;
+    display: grid;
+    place-items: center;
+    font-size: 16px;
+    overflow: hidden;
+}
+.team-logo img { width: 100%; height: 100%; object-fit: contain; }
+
+.team-name { font-weight: 800; font-size: 14px; }
+.score { text-align: center; }
+.score-number { font-size: 27px; font-weight: 900; letter-spacing: 1px; }
+.match-time { color: var(--green); font-size: 11px; font-weight: 900; margin-top: 4px; }
+.match-status { color: var(--muted); font-size: 10px; margin-top: 5px; }
+
+.match-actions { display: flex; gap: 8px; padding: 0 17px 15px; }
+
+.track-btn {
+    flex: 1;
+    border: 1px solid rgba(25,230,140,.2);
+    background: rgba(25,230,140,.08);
+    color: var(--green);
+    border-radius: 9px;
+    padding: 10px;
+    cursor: pointer;
+    font-weight: 800;
+    font-size: 12px;
+}
+
+.track-btn.tracking {
+    background: var(--green);
+    color: #04130d;
+}
+
+.details-btn {
+    width: 42px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    border-radius: 9px;
+    cursor: pointer;
+}
+
+.no-results, .loading-state { text-align: center; padding: 45px 10px; color: var(--muted); display: none; }
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.7);
+    backdrop-filter: blur(8px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 500;
+}
+
+.modal-overlay.show { display: flex; }
+
+.modal {
+    width: min(480px, 100%);
+    background: #0d131d;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 25px;
+    box-shadow: 0 30px 80px rgba(0,0,0,.5);
+}
+
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.modal-header h3 { font-size: 20px; }
+.close { background: none; border: 0; color: var(--muted); font-size: 22px; cursor: pointer; }
+
+.sms-info {
+    background: rgba(25,230,140,.05);
+    border: 1px solid rgba(25,230,140,.12);
+    padding: 14px;
+    border-radius: 12px;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.6;
+    margin-bottom: 18px;
+}
+
+.input-group { margin-bottom: 15px; }
+.input-group label { display: block; font-size: 11px; color: var(--muted); margin-bottom: 7px; font-weight: 700; }
+
+.input-group input {
+    width: 100%;
+    height: 45px;
+    background: #080d15;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    outline: none;
+    color: white;
+    padding: 0 13px;
+}
+
+.form-error { color: var(--red); font-size: 12px; margin: -8px 0 14px; display: none; }
+
+.confirm-btn {
+    width: 100%;
+    height: 46px;
+    border: 0;
+    background: var(--green);
+    color: #04130d;
+    border-radius: 9px;
+    font-weight: 900;
+    cursor: pointer;
+}
+
+.confirm-btn:disabled { opacity: .6; cursor: not-allowed; }
+
+.mobile-nav { display: none; }
+
+@media (max-width: 800px) {
+    header { padding: 0 18px; }
+    .google-btn { display: none; }
+    .layout { display: block; }
+    .sidebar { display: none; }
+    main { padding: 25px 15px 95px; }
+    .hero { align-items: flex-start; }
+    .hero h1 { font-size: 32px; }
+    .live-status { padding: 8px 10px; font-size: 10px; }
+    .match-body { grid-template-columns: 1fr 80px 1fr; padding: 16px 12px; }
+    .team-logo { width: 38px; height: 38px; }
+    .team-name { font-size: 12px; }
+    .score-number { font-size: 23px; }
+
+    .mobile-nav {
+        position: fixed;
+        bottom: 0; left: 0; right: 0;
+        height: 67px;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        background: rgba(8,12,19,.95);
+        border-top: 1px solid var(--border);
+        backdrop-filter: blur(20px);
+        z-index: 300;
+    }
+    .mobile-nav button { background: none; border: 0; color: var(--muted); font-size: 10px; cursor: pointer; }
+    .mobile-nav button.active { color: var(--green); }
+    .mobile-nav-icon { display: block; font-size: 19px; margin-bottom: 3px; }
+}
+
+</style>
+</head>
+<body>
+
+<header>
+    <div class="logo">
+        <div class="logo-icon">V</div>
+        VINTLA
+    </div>
+    <div class="header-right">
+        <button class="google-btn" onclick="googleLogin()">
+            <span>G</span> Continue with Google
+        </button>
+        <div class="profile">V</div>
+    </div>
+</header>
+
+<div class="layout">
+
+<aside class="sidebar">
+    <div class="sidebar-title">VINTLA</div>
+    <div class="nav-item active" onclick="changeNav(this)"><span class="nav-icon">⚡</span> Live Scores</div>
+    <div class="nav-item" onclick="changeNav(this)"><span class="nav-icon">📅</span> Fixtures</div>
+    <div class="nav-item" onclick="changeNav(this)"><span class="nav-icon">⭐</span> My Matches</div>
+    <div class="nav-item" onclick="changeNav(this)"><span class="nav-icon">🏆</span> Competitions</div>
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-title">Account</div>
+    <div class="nav-item" onclick="changeNav(this)"><span class="nav-icon">👤</span> Profile</div>
+    <div class="nav-item" onclick="changeNav(this)"><span class="nav-icon">⚙️</span> Settings</div>
+</aside>
+
+<main>
+
+    <section class="hero">
+        <div>
+            <h1>Football, <span>live.</span></h1>
+            <p>Scores, events and match updates in real time.</p>
+        </div>
+        <div class="live-status">
+            <span class="live-dot"></span> LIVE NOW
+        </div>
+    </section>
+
+    <div class="search-box">
+        <span>⌕</span>
+        <input id="searchInput" type="text" placeholder="Search teams or leagues..." oninput="searchMatches()">
+    </div>
+
+    <div class="filters">
+        <button class="filter active" onclick="filterMatches('all', this)">All</button>
+        <button class="filter" onclick="filterMatches('live', this)">🔴 Live</button>
+        <button class="filter" onclick="filterMatches('upcoming', this)">Upcoming</button>
+        <button class="filter" onclick="filterMatches('finished', this)">Finished</button>
+    </div>
+
+    <div class="section-header">
+        <h2>Live matches</h2>
+        <span id="liveCount">Loading…</span>
+    </div>
+
+    <div id="matches"></div>
+
+    <div class="loading-state" id="loadingState">Loading matches…</div>
+    <div class="no-results" id="noResults">No matches found.</div>
+
+</main>
+</div>
+
+<nav class="mobile-nav">
+    <button class="active"><span class="mobile-nav-icon">⚡</span> Live</button>
+    <button><span class="mobile-nav-icon">📅</span> Fixtures</button>
+    <button><span class="mobile-nav-icon">⭐</span> Tracked</button>
+    <button><span class="mobile-nav-icon">⚙️</span> Settings</button>
+</nav>
+
+<div class="modal-overlay" id="trackerModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3>Track this match</h3>
+            <button class="close" onclick="closeTracker()">×</button>
+        </div>
+
+        <div class="sms-info">
+            <strong id="selectedMatch">Match</strong>
+            <br><br>
+            VINTLA will text you the score and key events (goals, cards,
+            half-time, full-time) for this match as they happen.
+        </div>
+
+        <div class="input-group">
+            <label>PHONE NUMBER</label>
+            <input id="phoneNumber" type="tel" placeholder="+234 800 000 0000">
+        </div>
+        <div class="form-error" id="formError"></div>
+
+        <button class="confirm-btn" id="confirmBtn" onclick="startTracking()">🔔 Start Tracking</button>
+    </div>
+</div>
+
+<script>
+
+// ---------------------------------------------
+// STATE
+// ---------------------------------------------
+let currentFixtureId = null;
+let allMatches = [];          // last fetched batch (live + today's fixtures)
+let currentFilter = 'all';
+const trackedIds = new Set(); // fixture ids this browser has tracked
+
+// ---------------------------------------------
+// DATA LOADING
+// ---------------------------------------------
+async function loadMatches() {
+    document.getElementById('loadingState').style.display = 'block';
+    try {
+        const liveRes = await fetch('/api/matches/live');
+        const liveData = await liveRes.json();
+
+        const today = new Date().toISOString().slice(0, 10);
+        const dateRes = await fetch(`/api/matches/date/${today}`);
+        const dateData = await dateRes.json();
+
+        const liveIds = new Set((liveData.matches || []).map(m => m.id));
+        const rest = (dateData.matches || []).filter(m => !liveIds.has(m.id));
+
+        allMatches = [...(liveData.matches || []), ...rest];
+
+        renderMatches();
+        document.getElementById('liveCount').innerText =
+            `${(liveData.matches || []).length} live`;
+    } catch (err) {
+        console.error(err);
+        document.getElementById('liveCount').innerText = 'Could not load matches';
+    } finally {
+        document.getElementById('loadingState').style.display = 'none';
+    }
+}
+
+function statusBucket(status) {
+    if (['1H', '2H', 'HT', 'ET', 'P', 'LIVE'].includes(status)) return 'live';
+    if (['NS', 'TBD'].includes(status)) return 'upcoming';
+    return 'finished'; // FT, AET, PEN, etc
+}
+
+// ---------------------------------------------
+// RENDERING
+// ---------------------------------------------
+function renderMatches() {
+    const container = document.getElementById('matches');
+    const query = document.getElementById('searchInput').value.toLowerCase();
+
+    const filtered = allMatches.filter(m => {
+        const bucket = statusBucket(m.status);
+        const matchesFilter = currentFilter === 'all' || bucket === currentFilter;
+        const searchText = `${m.home.name} ${m.away.name} ${m.league}`.toLowerCase();
+        const matchesSearch = query === '' || searchText.includes(query);
+        return matchesFilter && matchesSearch;
+    });
+
+    container.innerHTML = filtered.map(renderCard).join('');
+    document.getElementById('noResults').style.display = filtered.length ? 'none' : 'block';
+}
+
+function renderCard(m) {
+    const bucket = statusBucket(m.status);
+    const isTracking = trackedIds.has(m.id);
+
+    const statusHtml = bucket === 'live'
+        ? `<span class="live-label">● LIVE ${m.minute ?? ''}'</span>`
+        : bucket === 'upcoming'
+            ? `<span class="competition">${new Date(m.kickoff).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</span>`
+            : `<span class="competition">FT</span>`;
+
+    const scoreHtml = bucket === 'upcoming'
+        ? `<div class="score-number">VS</div>`
+        : `<div class="score-number">${m.goals.home ?? 0} - ${m.goals.away ?? 0}</div>`;
+
+    return `
+    <div class="match-card">
+        <div class="match-top">
+            <span class="competition">${m.league}</span>
+            ${statusHtml}
+        </div>
+        <div class="match-body">
+            <div class="team">
+                <div class="team-logo">${m.home.logo ? `<img src="${m.home.logo}" alt="">` : '⚽'}</div>
+                <div class="team-name">${m.home.name}</div>
+            </div>
+            <div class="score">
+                ${scoreHtml}
+                ${bucket === 'live' ? `<div class="match-time">${m.minute ?? ''}'</div>` : ''}
+            </div>
+            <div class="team away">
+                <div class="team-name">${m.away.name}</div>
+                <div class="team-logo">${m.away.logo ? `<img src="${m.away.logo}" alt="">` : '⚽'}</div>
+            </div>
+        </div>
+        <div class="match-actions">
+            <button class="track-btn ${isTracking ? 'tracking' : ''}" onclick="openTracker(${m.id})">
+                ${isTracking ? '✓ Tracking' : '🔔 Track Match'}
+            </button>
+            <button class="details-btn" onclick="showDetails(${m.id})">→</button>
+        </div>
+    </div>`;
+}
+
+// ---------------------------------------------
+// SEARCH / FILTER
+// ---------------------------------------------
+function searchMatches() { renderMatches(); }
+
+function filterMatches(type, button) {
+    currentFilter = type;
+    document.querySelectorAll('.filter').forEach(b => b.classList.remove('active'));
+    button.classList.add('active');
+    renderMatches();
+}
+
+// ---------------------------------------------
+// TRACK MODAL
+// ---------------------------------------------
+function openTracker(fixtureId) {
+    const match = allMatches.find(m => m.id === fixtureId);
+    if (!match) return;
+
+    currentFixtureId = fixtureId;
+    document.getElementById('selectedMatch').innerText =
+        `${match.home.name} vs ${match.away.name}`;
+    document.getElementById('formError').style.display = 'none';
+    document.getElementById('trackerModal').classList.add('show');
+}
+
+function closeTracker() {
+    document.getElementById('trackerModal').classList.remove('show');
+}
+
+async function startTracking() {
+    const phone = document.getElementById('phoneNumber').value.trim();
+    const errorEl = document.getElementById('formError');
+    const btn = document.getElementById('confirmBtn');
+
+    if (!/^\+[1-9]\d{7,14}$/.test(phone)) {
+        errorEl.innerText = 'Enter your number in international format, e.g. +2348001234567';
+        errorEl.style.display = 'block';
+        return;
+    }
+
+    btn.disabled = true;
+    btn.innerText = 'Starting…';
+
+    try {
+        const res = await fetch('/api/track', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ fixtureId: currentFixtureId, phone })
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+            errorEl.innerText = data.error || 'Something went wrong.';
+            errorEl.style.display = 'block';
+            return;
+        }
+
+        trackedIds.add(currentFixtureId);
+        renderMatches();
+        closeTracker();
+    } catch (err) {
+        errorEl.innerText = 'Network error — please try again.';
+        errorEl.style.display = 'block';
+    } finally {
+        btn.disabled = false;
+        btn.innerText = '🔔 Start Tracking';
+    }
+}
+
+// ---------------------------------------------
+// GOOGLE LOGIN (stub — wire up later)
+// ---------------------------------------------
+function googleLogin() {
+    alert('Google Sign-In will be connected in the authentication stage.');
+}
+
+// ---------------------------------------------
+// NAV / DETAILS
+// ---------------------------------------------
+function changeNav(element) {
+    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+    element.classList.add('active');
+}
+
+function showDetails(fixtureId) {
+    const match = allMatches.find(m => m.id === fixtureId);
+    if (!match) return;
+    alert(`${match.home.name} vs ${match.away.name}\n\nFull match detail view coming soon.`);
+}
+
+document.getElementById('trackerModal').addEventListener('click', function (e) {
+    if (e.target === this) closeTracker();
+});
+
+// ---------------------------------------------
+// INIT
+// ---------------------------------------------
+loadMatches();
+setInterval(loadMatches, 30000); // refresh every 30s
+
+</script>
+</body>
+</html>
