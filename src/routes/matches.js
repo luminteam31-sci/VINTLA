@@ -22,6 +22,24 @@ router.get('/date/:date', async (req, res) => {
   } catch (err) { fail(res, err); }
 });
 
+// Raw SportScore detail for one match (handy for checking what data exists)
+router.get('/raw/:id', async (req, res) => {
+  try {
+    res.json(await footballApi.getMatchDetail(req.params.id));
+  } catch (err) { fail(res, err); }
+});
+
+// Match from the list + SportScore's detail (timeline, stats, lineups if provided)
+router.get('/detail/:id', async (req, res) => {
+  const match = await footballApi.getFixtureById(req.params.id).catch(() => null);
+  try {
+    res.json({ match, detail: await footballApi.getMatchDetail(req.params.id) });
+  } catch (err) {
+    if (match) return res.json({ match, detail: null, detailError: err.message });
+    fail(res, err);
+  }
+});
+
 router.get('/:id', async (req, res) => {
   try {
     const match = await footballApi.getFixtureById(req.params.id);
