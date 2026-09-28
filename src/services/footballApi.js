@@ -1,16 +1,29 @@
 const axios = require('axios');
 
+// Trim spaces/newlines/quotes that often sneak in when pasting a key
+const API_KEY = (process.env.APISPORTS_KEY || '').trim().replace(/^["']|["']$/g, '');
+
 const client = axios.create({
   baseURL: 'https://v3.football.api-sports.io',
-  headers: { 'x-apisports-key': process.env.APISPORTS_KEY }
+  headers: { 'x-apisports-key': API_KEY }
 });
 
-// API-Sports returns HTTP 200 even for bad keys / plan limits,
-// with the problem inside an "errors" field. Surface it.
-function unwrap(res) {
-  if (!process.env.APISPORTS_KEY) {
-    throw new Error('APISPORTS_KEY is not set on the server');
+// Runs a request and turns any failure into a readable message
+// (HTTP status + what API-Sports actually said).
+async function get(path, params) {
+  if (!API_KEY) throw new Error('APISPORTS_KEY is not set on the server');
+
+  let res;
+  try {
+    res = await client.get(path, { params });
+  } catch (err) {
+    if (err.response) {
+      const body = JSON.stringify(err.response.data || '').slice(0, 160);
+      throw new Error(`HTTP ${err.response.status} from API-Sports: ${body} (key length ${API_KEY.length})`);
+    }
+    throw err;
   }
+
   const errs = res.data.errors;
   const list = Array.isArray(errs) ? errs : Object.values(errs || {});
   if (list.length > 0) throw new Error(list.join(', '));
@@ -18,18 +31,15 @@ function unwrap(res) {
 }
 
 async function getLiveFixtures() {
-  const res = await client.get('/fixtures', { params: { live: 'all' } });
-  return unwrap(res).map(normalizeFixture);
+  return (await get('/fixtures', { live: 'all' })).map(normalizeFixture);
 }
 
 async function getFixturesByDate(dateStr) {
-  const res = await client.get('/fixtures', { params: { date: dateStr } });
-  return unwrap(res).map(normalizeFixture);
+  return (await get('/fixtures', { date: dateStr })).map(normalizeFixture);
 }
 
 async function getFixtureById(fixtureId) {
-  const res = await client.get('/fixtures', { params: { id: fixtureId } });
-  const fixture = unwrap(res)[0];
+  const fixture = (await get('/fixtures', { id: fixtureId }))[0];
   return fixture ? normalizeFixture(fixture) : null;
 }
 
