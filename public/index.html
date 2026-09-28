@@ -458,6 +458,11 @@ main {
     <div class="loading-state" id="loadingState">Loading matches…</div>
     <div class="no-results" id="noResults">No matches found.</div>
 
+    <p style="text-align:center;margin-top:34px;font-size:12px;color:var(--muted)">
+        <a href="https://sportscore.com/" rel="dofollow" title="Sports data by SportScore"
+           style="color:var(--green);text-decoration:none;font-weight:700">Powered by SportScore</a>
+    </p>
+
 </main>
 </div>
 
@@ -559,14 +564,31 @@ function renderMatches() {
     document.getElementById('noResults').style.display = filtered.length ? 'none' : 'block';
 }
 
+function esc(v) {
+    return String(v ?? '').replace(/[&<>"']/g, c => (
+        {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]
+    ));
+}
+
+function logoHtml(url) {
+    if (!url) return '⚽';
+    return `<img src="${esc(url)}" alt="" onerror="this.replaceWith(document.createTextNode('⚽'))">`;
+}
+
+function kickoffLabel(kickoff) {
+    const d = new Date(kickoff);
+    return isNaN(d) ? '' : d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
 function renderCard(m) {
     const bucket = statusBucket(m.status);
     const isTracking = trackedIds.has(m.id);
+    const id = esc(m.id);
 
     const statusHtml = bucket === 'live'
-        ? `<span class="live-label">● LIVE ${m.minute ?? ''}'</span>`
+        ? `<span class="live-label">● ${esc(m.statusText || 'LIVE')}</span>`
         : bucket === 'upcoming'
-            ? `<span class="competition">${new Date(m.kickoff).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</span>`
+            ? `<span class="competition">${kickoffLabel(m.kickoff)}</span>`
             : `<span class="competition">FT</span>`;
 
     const scoreHtml = bucket === 'upcoming'
@@ -576,28 +598,28 @@ function renderCard(m) {
     return `
     <div class="match-card">
         <div class="match-top">
-            <span class="competition">${m.league}</span>
+            <span class="competition">${esc(m.league)}</span>
             ${statusHtml}
         </div>
         <div class="match-body">
             <div class="team">
-                <div class="team-logo">${m.home.logo ? `<img src="${m.home.logo}" alt="">` : '⚽'}</div>
-                <div class="team-name">${m.home.name}</div>
+                <div class="team-logo">${logoHtml(m.home.logo)}</div>
+                <div class="team-name">${esc(m.home.name)}</div>
             </div>
             <div class="score">
                 ${scoreHtml}
-                ${bucket === 'live' ? `<div class="match-time">${m.minute ?? ''}'</div>` : ''}
+                ${bucket === 'live' && m.minute ? `<div class="match-time">${m.minute}'</div>` : ''}
             </div>
             <div class="team away">
-                <div class="team-name">${m.away.name}</div>
-                <div class="team-logo">${m.away.logo ? `<img src="${m.away.logo}" alt="">` : '⚽'}</div>
+                <div class="team-name">${esc(m.away.name)}</div>
+                <div class="team-logo">${logoHtml(m.away.logo)}</div>
             </div>
         </div>
         <div class="match-actions">
-            <button class="track-btn ${isTracking ? 'tracking' : ''}" onclick="openTracker(${m.id})">
+            <button class="track-btn ${isTracking ? 'tracking' : ''}" data-id="${id}" onclick="openTracker(this.dataset.id)">
                 ${isTracking ? '✓ Tracking' : '🔔 Track Match'}
             </button>
-            <button class="details-btn" onclick="showDetails(${m.id})">→</button>
+            <button class="details-btn" data-id="${id}" onclick="showDetails(this.dataset.id)">→</button>
         </div>
     </div>`;
 }
