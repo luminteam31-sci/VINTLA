@@ -462,10 +462,10 @@ main {
 </div>
 
 <nav class="mobile-nav">
-    <button class="active"><span class="mobile-nav-icon">⚡</span> Live</button>
-    <button><span class="mobile-nav-icon">📅</span> Fixtures</button>
-    <button><span class="mobile-nav-icon">⭐</span> Tracked</button>
-    <button><span class="mobile-nav-icon">⚙️</span> Settings</button>
+    <button class="active" onclick="mobileNav(this,'all')"><span class="mobile-nav-icon">⚡</span> Live</button>
+    <button onclick="mobileNav(this,'upcoming')"><span class="mobile-nav-icon">📅</span> Fixtures</button>
+    <button onclick="mobileNav(this,'tracked')"><span class="mobile-nav-icon">⭐</span> Tracked</button>
+    <button onclick="mobileNav(this,'settings')"><span class="mobile-nav-icon">⚙️</span> Settings</button>
 </nav>
 
 <div class="modal-overlay" id="trackerModal">
@@ -521,8 +521,10 @@ async function loadMatches() {
         allMatches = [...(liveData.matches || []), ...rest];
 
         renderMatches();
-        document.getElementById('liveCount').innerText =
-            `${(liveData.matches || []).length} live`;
+        const apiError = liveData.error || dateData.error;
+        document.getElementById('liveCount').innerText = apiError
+            ? (liveData.detail || dateData.detail || apiError)
+            : `${(liveData.matches || []).length} live`;
     } catch (err) {
         console.error(err);
         document.getElementById('liveCount').innerText = 'Could not load matches';
@@ -546,7 +548,8 @@ function renderMatches() {
 
     const filtered = allMatches.filter(m => {
         const bucket = statusBucket(m.status);
-        const matchesFilter = currentFilter === 'all' || bucket === currentFilter;
+        const matchesFilter = currentFilter === 'all'
+            || (currentFilter === 'tracked' ? trackedIds.has(m.id) : bucket === currentFilter);
         const searchText = `${m.home.name} ${m.away.name} ${m.league}`.toLowerCase();
         const matchesSearch = query === '' || searchText.includes(query);
         return matchesFilter && matchesSearch;
@@ -667,6 +670,18 @@ async function startTracking() {
         btn.disabled = false;
         btn.innerText = '🔔 Start Tracking';
     }
+}
+
+function mobileNav(btn, view) {
+    if (view === 'settings') {
+        alert('Settings coming soon.');
+        return;
+    }
+    document.querySelectorAll('.mobile-nav button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilter = view;
+    document.querySelectorAll('.filter').forEach(b => b.classList.remove('active'));
+    renderMatches();
 }
 
 // ---------------------------------------------
