@@ -53,6 +53,26 @@ async function getAll() {
   return inFlight;
 }
 
+// Match detail (timeline / stats / lineups, whatever SportScore provides)
+const detailCache = new Map(); // id -> { data, time }
+
+async function getMatchDetail(id) {
+  id = String(id);
+  if (!/^[\w.%~-]{1,200}$/.test(id)) throw new Error('Invalid match id');
+  const hit = detailCache.get(id);
+  if (hit && Date.now() - hit.time < CACHE_TTL) return hit.data;
+  try {
+    const res = await client.get('/match/', { params: { sport: 'football', slug: id, src: SRC } });
+    detailCache.set(id, { data: res.data, time: Date.now() });
+    if (detailCache.size > 100) detailCache.delete(detailCache.keys().next().value);
+    return res.data;
+  } catch (err) {
+    if (hit) return hit.data; // serve last good data instead of failing
+    if (err.response) throw new Error(`HTTP ${err.response.status} from SportScore`);
+    throw err;
+  }
+}
+
 // ---- Public functions (same names as before) ----------------------
 async function getLiveFixtures() {
   return (await getAll()).filter(m => m.status === 'LIVE');
@@ -109,4 +129,4 @@ function normalizeMatch(raw) {
   };
 }
 
-module.exports = { getLiveFixtures, getFixturesByDate, getFixtureById };
+module.exports = { getLiveFixtures, getFixturesByDate, getFixtureById, getMatchDetail };
