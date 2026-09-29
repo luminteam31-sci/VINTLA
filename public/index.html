@@ -126,8 +126,8 @@ a{text-decoration:none;color:inherit}
 .event-card .event-label{color:var(--accent);font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:1px}
 .event-card h3{font-size:15px;margin-top:9px}
 .event-card p{color:var(--muted);font-size:11px;margin-top:7px}
-.attribution{text-align:center;margin:30px 0 0;font-size:12px;color:var(--muted)}
-.attribution a{color:var(--accent);font-weight:800}
+.attribution{text-align:center;margin:26px 0 0;font-size:10px;color:var(--muted);opacity:.75}
+.attribution a{color:var(--muted);font-weight:700;text-decoration:underline}
 .overlay{position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,.72);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;padding:20px}
 .overlay.show{display:flex}
 .modal{width:min(430px,100%);max-height:90vh;overflow:auto;background:#101720;border:1px solid #263441;border-radius:22px;padding:28px;box-shadow:0 30px 100px rgba(0,0,0,.55);animation:modalIn .25s ease}
@@ -164,6 +164,16 @@ a{text-decoration:none;color:inherit}
 .detail-content{padding-top:18px}
 .goal-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--border);font-size:12px}
 .goal-row:last-child{border-bottom:0}
+.timeline{display:flex;flex-direction:column;gap:2px}
+.tl-row{display:grid;grid-template-columns:1fr 34px 1fr;align-items:center;gap:8px;padding:7px 0}
+.tl-line{display:flex;justify-content:center}
+.tl-icon{width:28px;height:28px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:13px}
+.tl-card{background:rgba(255,255,255,.025);border:1px solid var(--border);border-radius:10px;padding:8px 11px;font-size:12px;line-height:1.4}
+.tl-min{color:var(--accent);font-weight:800;font-size:11px}
+.tl-who{margin-top:2px;font-weight:700}
+.tl-row.tl-home .tl-card{grid-column:1}
+.tl-row.tl-away .tl-card{grid-column:3;text-align:right}
+@media(max-width:480px){.tl-card{font-size:11px;padding:7px 9px}.tl-icon{width:24px;height:24px;font-size:11px}}
 .goal-player{font-weight:700}
 .goal-minute{color:var(--accent);white-space:nowrap}
 .stat-block{margin-bottom:16px}
@@ -255,9 +265,9 @@ a{text-decoration:none;color:inherit}
    <section class="section">
     <div class="section-head"><h2 class="section-title">Football <span>Events</span></h2></div>
     <div class="event-grid">
-     <div class="event-card"><div class="event-label">Competition</div><h3>UEFA Champions League</h3><p>Fixtures, results and live match events.</p></div>
-     <div class="event-card"><div class="event-label">Competition</div><h3>Premier League</h3><p>Follow every match throughout the season.</p></div>
-     <div class="event-card"><div class="event-label">International</div><h3>World Football</h3><p>International fixtures and competitions.</p></div>
+     <div class="event-card" data-quick="champions league" style="cursor:pointer"><div class="event-label">Competition</div><h3>UEFA Champions League</h3><p>Fixtures, results and live match events.</p></div>
+     <div class="event-card" data-quick="premier league" style="cursor:pointer"><div class="event-label">Competition</div><h3>Premier League</h3><p>Follow every match throughout the season.</p></div>
+     <div class="event-card" data-quick="international" style="cursor:pointer"><div class="event-label">International</div><h3>World Football</h3><p>International fixtures and competitions.</p></div>
     </div>
    </section>
   </div>
@@ -520,7 +530,10 @@ function render(){
   if(loadError)toastOnce('Could not refresh scores: '+loadError);
 
   const counts={};all.forEach(m=>{counts[m.league]=(counts[m.league]||0)+1;});
-  const topLeagues=Object.keys(counts).sort((a,b)=>counts[b]-counts[a]).slice(0,10);
+  // Popular leagues are pinned first, in this order, when they actually have matches today.
+  const POPULAR=['premier league','champions league','la liga','serie a','bundesliga','ligue 1','europa league','efl championship','fa cup','carabao cup'];
+  const rank=name=>{const n=name.toLowerCase();const i=POPULAR.findIndex(p=>n.includes(p));return i===-1?99:i;};
+  const topLeagues=Object.keys(counts).sort((a,b)=>rank(a)-rank(b)||counts[b]-counts[a]).slice(0,10);
   if(leagueFilter!=='all'&&!counts[leagueFilter])leagueFilter='all';
   $('leagueTabs').innerHTML=['all',...topLeagues].map(l=>{
     const label=l==='all'?'All leagues':l;
@@ -536,6 +549,17 @@ function toastOnce(t){if(t===lastErrToast)return;lastErrToast=t;toast(t);}
 
 $('categoryTabs').addEventListener('click',e=>{const b=e.target.closest('.category-tab');if(!b)return;topFilter=b.dataset.tab;document.querySelectorAll('.category-tab').forEach(x=>x.classList.remove('active'));b.classList.add('active');render();});
 $('leagueTabs').addEventListener('click',e=>{const b=e.target.closest('.league-tab');if(!b)return;leagueFilter=b.dataset.league;render();});
+document.querySelector('.event-grid').addEventListener('click',e=>{
+  const c=e.target.closest('[data-quick]');if(!c)return;
+  const kw=c.dataset.quick;
+  leagueFilter='all';topFilter='all';query=kw;
+  document.querySelectorAll('.category-tab').forEach(x=>x.classList.toggle('active',x.dataset.tab==='all'));
+  $('searchInput').value=kw;
+  render();
+  const hit=matches.some(m=>(m.home.name+' '+m.away.name+' '+m.league).toLowerCase().includes(kw));
+  if(!hit)toast('No '+c.querySelector('h3').textContent+' matches in the current list right now.');
+  document.querySelector('.section').scrollIntoView({behavior:'smooth'});
+});
 $('searchInput').addEventListener('input',function(){query=this.value;render();});
 $('focusSearchBtn').addEventListener('click',()=>{$('searchInput').focus();$('searchInput').scrollIntoView({behavior:'smooth',block:'center'});});
 $('brandHome').addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
@@ -589,17 +613,30 @@ async function untrack(id){
 }
 
 /* match detail */
+function personName(v){
+  if(!v)return'';
+  if(typeof v==='string')return v;
+  if(typeof v==='object')return v.name||v.short_name||v.player_name||v.full_name||'';
+  return'';
+}
 function toEvent(e){
-  const t=String(e.type||e.kind||e.event||e.incident_type||e.incident||'').toLowerCase();
-  const p=e.player&&typeof e.player==='object'?(e.player.name||e.player.short_name||''):(e.player||e.player_name||e.playerName||e.name||'');
+  const t=String(e.type||e.kind||e.event||e.incident_type||e.incident||e.action||'').toLowerCase();
+  const p=personName(e.player)||personName(e.player1)||personName(e.scorer)||personName(e.in)||
+          e.player_name||e.playerName||e.name||'';
+  const assist=personName(e.assist)||personName(e.player2)||e.assist_name||'';
+  const subOut=personName(e.out)||e.player_out||'';
   if(!t&&!p)return null;
   const min=e.minute!=null?e.minute:(e.time!=null?e.time:(e.min!=null?e.min:''));
-  let icon='•';
-  if(/own/.test(t)&&/goal/.test(t))icon='⚽ OG';
-  else if(/goal|penalty/.test(t)&&!/miss|no goal|disallow|cancel/.test(t))icon='⚽';
-  else if(/yellow/.test(t))icon='🟨';else if(/red/.test(t))icon='🟥';else if(/sub/.test(t))icon='🔄';else if(/var/.test(t))icon='📺';
+  let icon='•',label='Event';
+  if(/own/.test(t)&&/goal/.test(t)){icon='⚽ OG';label='Own goal';}
+  else if(/goal|penalty/.test(t)&&!/miss|no goal|disallow|cancel/.test(t)){icon='⚽';label=/penalty/.test(t)?'Penalty goal':'Goal';}
+  else if(/yellow/.test(t)){icon='🟨';label='Yellow card';}
+  else if(/red/.test(t)){icon='🟥';label='Red card';}
+  else if(/sub/.test(t)){icon='🔄';label='Substitution';}
+  else if(/var/.test(t)){icon='📺';label='VAR review';}
+  else if(t){label=t.replace(/[_-]/g,' ').replace(/\b\w/g,c=>c.toUpperCase());}
   const team=typeof e.team==='string'?e.team:(e.team&&e.team.name)||'';
-  return {min:String(min),icon,goal:icon.indexOf('⚽')===0,player:String(p),team:String(team)};
+  return {min:String(min),icon,goal:icon.indexOf('⚽')===0,player:String(p),assist:String(assist),subOut:String(subOut),label,team:String(team)};
 }
 function parseDetail(raw){
   const out={events:[],stats:[],lineups:null};
@@ -640,7 +677,14 @@ function detailBody(){
   if(!ev.length)return '<p class="modal-subtitle" style="line-height:1.5">Goal scorers and the match timeline will show here when they become available for this match.</p>'
    +'<div class="goal-row"><span>Competition</span><strong>'+esc(m.league)+'</strong></div>'
    +'<div class="goal-row"><span>Status</span><strong>'+esc(m.status==='LIVE'?(m.statusText||'Live'):m.status==='NS'?'Not started':'Full time')+'</strong></div>';
-  return ev.map(e=>'<div class="goal-row"><span class="goal-player">'+e.icon+' '+esc(e.player||'Event')+(e.team?' <span class="modal-subtitle">('+esc(e.team)+')</span>':'')+'</span><span class="goal-minute">'+esc(e.min?e.min+"'":'')+'</span></div>').join('');
+  return '<div class="timeline">'+ev.map(e=>{
+    const side=e.team&&e.team===m.away.name?'away':'home';
+    let who=e.player?esc(e.player):esc(e.label);
+    if(e.label==='Substitution'&&(e.player||e.subOut))who=(e.player?'On: '+esc(e.player):'')+(e.subOut?(e.player?' · ':'')+'Off: '+esc(e.subOut):'')||esc(e.label);
+    if(e.goal&&e.assist)who+=' <span class="modal-subtitle">(assist: '+esc(e.assist)+')</span>';
+    return '<div class="tl-row tl-'+side+'"><div class="tl-line"><span class="tl-icon">'+e.icon.replace(' OG','')+'</span></div>'
+      +'<div class="tl-card"><div class="tl-min">'+esc(e.min?e.min+"'":'')+'</div><div class="tl-who">'+who+'</div></div></div>';
+  }).join('')+'</div>';
 }
 function paintDetail(){detailTabs();$('detailContent').innerHTML=detailBody();}
 async function openDetail(id,quiet){
