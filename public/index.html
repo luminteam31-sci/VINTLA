@@ -24,8 +24,9 @@ button:disabled{opacity:.55;cursor:not-allowed}
 .topbar{display:flex;align-items:center;justify-content:space-between}
 .logo{position:relative;font-family:"Space Grotesk",sans-serif;font-size:30px;font-weight:800;letter-spacing:2px;line-height:1;display:inline-flex;align-items:center;cursor:pointer}
 .logo-word{position:relative;display:inline-block;color:#f3f8ff;text-shadow:0 0 18px rgba(90,166,255,.55),0 0 3px rgba(255,255,255,.35)}
-.a-wrap{position:relative;display:inline-block}
-.ball-on-a{position:absolute;left:50%;bottom:-.09em;transform:translateX(-50%);font-size:.6em;line-height:1;filter:drop-shadow(0 1px 3px rgba(0,0,0,.6)) drop-shadow(0 0 7px rgba(90,166,255,.6));z-index:2}
+.a-wrap{position:relative;display:inline-block;padding-right:1px}
+.a-letter{display:inline-block;position:relative;z-index:1}
+.ball-on-a{position:absolute;left:50%;bottom:-.09em;transform:translateX(-50%);font-size:.6em;line-height:1;z-index:2;filter:drop-shadow(0 1px 3px rgba(0,0,0,.6)) drop-shadow(0 0 7px rgba(90,166,255,.6));pointer-events:none}
 .subbrand{font-size:9px;color:#8fa6d1;letter-spacing:3px;margin-left:47px;margin-top:6px;text-transform:uppercase}
 .header-actions{display:flex;gap:10px}
 .icon-btn{width:38px;height:38px;border-radius:50%;border:1px solid var(--border);background:rgba(255,255,255,.055);display:flex;align-items:center;justify-content:center;font-size:19px;color:white;position:relative;overflow:hidden}
@@ -43,12 +44,26 @@ button:disabled{opacity:.55;cursor:not-allowed}
 .segment{margin:4px 18px 15px;height:54px;border:1px solid var(--border);background:#071945;border-radius:28px;padding:4px;display:flex}
 .segment button{flex:1;border:0;border-radius:24px;color:#a6b9dd;background:transparent;font-size:14px;font-weight:700}
 .segment button.active{background:linear-gradient(135deg,var(--blue),var(--blue2));color:white;box-shadow:0 6px 20px rgba(24,99,255,.35)}
-.premium{margin:0 18px 18px;min-height:128px;border-radius:20px;position:relative;overflow:hidden;padding:18px;background:radial-gradient(circle at 80% 50%,rgba(255,176,32,.22),transparent 28%),linear-gradient(135deg,#1c1506,#09256c 60%,#06183f);border:1px solid rgba(255,195,90,.3)}
-.premium:before{content:"";position:absolute;width:220px;height:220px;right:-75px;top:-70px;border-radius:50%;border:2px solid rgba(255,195,90,.22);box-shadow:0 0 0 18px rgba(255,195,90,.05),0 0 0 36px rgba(86,154,255,.04)}
-.premium small{color:var(--gold2);font-size:10px;font-weight:800;letter-spacing:1px}
-.premium h2{font-size:20px;margin-top:8px;max-width:220px;line-height:1.15}
-.premium p{margin-top:8px;font-size:10px;color:#9eb2d8}
-.upgrade{position:absolute;right:17px;bottom:18px;border:1px solid rgba(255,195,90,.5);background:linear-gradient(135deg,var(--gold),#e08f00);color:#2a1a00;font-weight:800;border-radius:22px;padding:10px 14px;font-size:11px}
+/* VINTLA FOOTBALL NEWS CAROUSEL */
+.news-carousel{position:relative;margin:0 18px 20px;height:clamp(220px,55vw,310px);min-height:220px;overflow:hidden;border-radius:20px;background:#081633;border:1px solid rgba(120,160,235,.25);box-shadow:0 14px 35px rgba(0,0,0,.28);isolation:isolate}
+.news-slide{position:absolute;inset:0;opacity:0;visibility:hidden;transform:scale(1.025);transition:opacity .55s ease,transform .8s ease,visibility .55s;pointer-events:none}
+.news-slide.active{opacity:1;visibility:visible;transform:scale(1);pointer-events:auto;z-index:2}
+.news-slide img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 30%;z-index:-2}
+.news-slide::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(2,5,16,.96) 0%,rgba(2,5,16,.84) 36%,rgba(2,5,16,.28) 75%,rgba(2,5,16,.12) 100%),linear-gradient(0deg,rgba(2,5,16,.65),transparent 60%)}
+.news-copy{position:absolute;left:19px;right:15px;bottom:43px;max-width:78%;z-index:3}
+.news-category{display:inline-flex;align-items:center;gap:6px;color:#fff;background:var(--blue);padding:6px 10px;border-radius:5px;font-size:9px;font-weight:800;letter-spacing:1.1px;text-transform:uppercase;margin-bottom:12px}
+.news-copy h2{font-family:Inter,sans-serif;font-size:clamp(21px,5.3vw,32px);line-height:1.12;font-weight:800;letter-spacing:-.8px;color:#fff;text-shadow:0 2px 12px rgba(0,0,0,.45);margin-bottom:10px}
+.news-copy p{color:#d4def1;font-size:11px;line-height:1.5;max-width:290px}
+.news-meta{margin-top:11px;color:#91b8ff;font-size:10px;font-weight:700}
+.news-controls{position:absolute;bottom:13px;left:19px;right:15px;z-index:5;display:flex;align-items:center;justify-content:space-between}
+.news-dots{display:flex;align-items:center;gap:7px}
+.news-dot{width:7px;height:7px;padding:0;border-radius:50%;background:rgba(255,255,255,.48);transition:.25s}
+.news-dot.active{width:21px;border-radius:8px;background:#fff}
+.news-arrows{display:flex;gap:7px}
+.news-arrow{width:30px;height:30px;border-radius:50%;color:white;background:rgba(8,20,48,.7);border:1px solid rgba(255,255,255,.28);font-size:19px}
+.news-arrow:active{background:var(--blue)}
+@media(min-width:800px){.news-carousel{height:340px;margin-left:32px;margin-right:32px}.news-copy{left:28px;bottom:48px;max-width:58%}.news-copy h2{font-size:36px}.news-copy p{font-size:13px}.news-controls{left:28px;right:25px}}
+@media(prefers-reduced-motion:reduce){.news-slide{transition:none}}
 .filterbar{display:flex;gap:10px;padding:0 18px 12px;flex-wrap:wrap}
 .filter{height:48px;border-radius:24px;padding:0 16px;border:1px solid var(--border);background:#071943;color:#d5e0f4;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600}
 .filter.live{color:#ff8297;border-color:rgba(255,45,78,.5);background:rgba(255,35,70,.08)}
@@ -238,7 +253,7 @@ button:disabled{opacity:.55;cursor:not-allowed}
  <div class="topbar">
   <div>
    <div class="logo" id="brandHome">
-    <span class="logo-word">VINTL<span class="a-wrap">A<span class="ball-on-a">⚽</span></span></span>
+    <span class="logo-word">VINTL<span class="a-wrap"><span class="a-letter">A</span><span class="ball-on-a">⚽</span></span></span>
    </div>
    <div class="subbrand">LIVE SCORES • SPORTS • MORE</div>
   </div>
@@ -266,11 +281,51 @@ button:disabled{opacity:.55;cursor:not-allowed}
  <button data-seg="leagues">♢ &nbsp; Leagues</button>
 </div>
 
-<section class="premium">
- <small>✦ VINTLA PREMIUM</small>
- <h2>Bigger moments.<br>Closer to you.</h2>
- <p>Live stats &nbsp; • &nbsp; Exclusive insights &nbsp; • &nbsp; No ads</p>
- <button class="upgrade" id="premiumBtn">Explore →</button>
+<!-- VINTLA FOOTBALL NEWS -->
+<section class="news-carousel" id="newsCarousel" aria-label="Football news">
+
+ <article class="news-slide active">
+  <img src="/images/news-1.jpg" alt="Footballer striking the ball" fetchpriority="high">
+  <div class="news-copy">
+   <span class="news-category">⚽ Football Update</span>
+   <h2>THE BEAUTIFUL GAME NEVER STOPS.</h2>
+   <p>Follow the latest stories, match action and talking points from football.</p>
+   <div class="news-meta">VINTLA SPORTS DESK</div>
+  </div>
+ </article>
+
+ <article class="news-slide">
+  <img src="/images/news-2.jpg" alt="Footballer running onto the ball" loading="lazy">
+  <div class="news-copy">
+   <span class="news-category">🏆 League Watch</span>
+   <h2>THE RACE FOR GLORY IS ON.</h2>
+   <p>Big games, fierce rivalries and the battles shaping the football season.</p>
+   <div class="news-meta">LEAGUE ROUNDUP</div>
+  </div>
+ </article>
+
+ <article class="news-slide">
+  <img src="/images/news-3.jpg" alt="Footballer controlling the ball" loading="lazy">
+  <div class="news-copy">
+   <span class="news-category">📊 Match Centre</span>
+   <h2>EVERY GOAL HAS A STORY.</h2>
+   <p>Keep up with the scores, results and moments that matter to fans.</p>
+   <div class="news-meta">MATCHDAY COVERAGE</div>
+  </div>
+ </article>
+
+ <div class="news-controls">
+  <div class="news-dots" id="newsDots">
+   <button class="news-dot active" data-slide="0" aria-label="News story 1"></button>
+   <button class="news-dot" data-slide="1" aria-label="News story 2"></button>
+   <button class="news-dot" data-slide="2" aria-label="News story 3"></button>
+  </div>
+  <div class="news-arrows">
+   <button class="news-arrow" id="newsPrev" aria-label="Previous story">‹</button>
+   <button class="news-arrow" id="newsNext" aria-label="Next story">›</button>
+  </div>
+ </div>
+
 </section>
 
 <div class="filterbar">
@@ -430,6 +485,65 @@ document.querySelectorAll('.modal').forEach(o=>o.addEventListener('click',e=>{if
 document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal.show').forEach(o=>{if(o.id!=='toastHost')closeO(o.id);});});
 $('brandHome').addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
 
+/* VINTLA NEWS CAROUSEL */
+(function initNewsCarousel() {
+  const carousel = document.getElementById('newsCarousel');
+  if (!carousel) return;
+
+  const slides = [...carousel.querySelectorAll('.news-slide')];
+  const dots = [...carousel.querySelectorAll('.news-dot')];
+  const prev = document.getElementById('newsPrev');
+  const next = document.getElementById('newsNext');
+
+  let current = 0;
+  let timer;
+
+  function showSlide(index) {
+    current = (index + slides.length) % slides.length;
+
+    slides.forEach((slide, i) => {
+      slide.classList.toggle('active', i === current);
+      slide.setAttribute('aria-hidden', String(i !== current));
+    });
+
+    dots.forEach((dot, i) => {
+      dot.classList.toggle('active', i === current);
+      dot.setAttribute('aria-current',
+        i === current ? 'true' : 'false');
+    });
+  }
+
+  function restartTimer() {
+    clearInterval(timer);
+    timer = setInterval(() => {
+      if (!document.hidden) showSlide(current + 1);
+    }, 6500);
+  }
+
+  prev.addEventListener('click', () => {
+    showSlide(current - 1);
+    restartTimer();
+  });
+
+  next.addEventListener('click', () => {
+    showSlide(current + 1);
+    restartTimer();
+  });
+
+  dots.forEach((dot, i) => {
+    dot.addEventListener('click', () => {
+      showSlide(i);
+      restartTimer();
+    });
+  });
+
+  carousel.addEventListener('mouseenter', () => clearInterval(timer));
+  carousel.addEventListener('mouseleave', restartTimer);
+
+  showSlide(0);
+  restartTimer();
+})();
+
 const dt=iso=>{const d=new Date(iso);return isNaN(d)?null:d;};
 const fmtTime=iso=>{const d=dt(iso);return d?d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'';};
 function fmtKick(iso){const d=dt(iso);if(!d)return'';const t=fmtTime(iso);return d.toDateString()===new Date().toDateString()?'Today · '+t:d.toLocaleDateString([],{day:'numeric',month:'short'})+' · '+t;}
@@ -464,7 +578,6 @@ $('imageInput').addEventListener('change',function(){
 });
 $('profileBtn').addEventListener('click',()=>{renderThemes();openO('settingsModal');});
 $('favBtn').addEventListener('click',()=>goNav('favorites'));
-$('premiumBtn').addEventListener('click',()=>toast('VINTLA Premium is not available yet.'));
 
 /* auth */
 function msg(text,kind){const el=$('authMsg');el.textContent=text||'';el.className='msg '+(text?(kind||'err'):'hidden');}
